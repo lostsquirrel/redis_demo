@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+	
+	<context:property-placeholder location="classpath:config.properties" />
+
+	<context:annotation-config />
+
+	<context:component-scan base-package="com.soulagou.sample.redis.dao" />
+	<context:component-scan base-package="com.soulagou.sample.redis.domain" />
+	<context:component-scan base-package="com.soulagou.sample.redis.dao.impl" />
+<!-- Redis Key Serializer -->
+	<bean id="stringKeySerializer" class="com.soulagou.commons.support.StringKeySerializer" />
+	
+	<!-- Redis Connection Pool -->
+	<bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig" 
+		p:maxActive="${redis.pool.maxActive}" p:maxIdle="${redis.pool.maxIdle}" 
+		p:maxWait="${redis.pool.maxWait}" p:testOnBorrow="${redis.pool.testOnBorrow}" />
+	
+
+	<!-- Redis Cache Configuration -->
+	<bean id="reidsCacheConnectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory"
+		p:hostName="${redis.cache.host}" p:port="${redis.cache.port}"
+		p:database="${redis.cache.db}" p:poolConfig-ref="jedisPoolConfig" />
+
+	<bean id="redisCacheTemplate" class="org.springframework.data.redis.core.RedisTemplate"
+		p:connection-factory-ref="reidsCacheConnectionFactory" p:keySerializer-ref="stringKeySerializer" />
+
+	<!-- Redis Persist Configuration -->
+	<bean id="redisPersistConnectionFactory"
+		class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory"
+		p:hostName="${redis.persist.host}" p:port="${redis.persist.port}"
+		p:database="${redis.persist.db}" p:poolConfig-ref="jedisPoolConfig" />
+
+	<bean id="redisPersistTemplate" class="org.springframework.data.redis.core.RedisTemplate"
+		p:connection-factory-ref="redisPersistConnectionFactory" p:keySerializer-ref="stringKeySerializer" />
+
+
+</beans>
